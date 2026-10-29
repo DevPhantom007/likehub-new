@@ -1,0 +1,98 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String
+  password      String
+  image         String?
+  posts         Post[]
+  likes         Like[]
+  comments      Comment[]
+  saves         Save[]
+  followers     Follow[]       @relation("follower")
+  following     Follow[]       @relation("following")
+  notifications Notification[] @relation("userNotifications")
+  createdAt     DateTime       @default(now())
+}
+
+model Post {
+  id        Int       @id @default(autoincrement())
+  title     String
+  content   String
+  image     String?
+  views     Int       @default(0)
+  isPremium Boolean   @default(false)
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id])
+  likes     Like[]
+  comments  Comment[]
+  saves     Save[]
+  hashtags  Hashtag[]
+  createdAt DateTime  @default(now())
+}
+
+model Like {
+  id     Int    @id @default(autoincrement())
+  userId String
+  postId Int
+  user   User   @relation(fields: [userId], references: [id])
+  post   Post   @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  text      String
+  userId    String
+  postId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Save {
+  id     Int    @id @default(autoincrement())
+  userId String
+  postId Int
+  user   User   @relation(fields: [userId], references: [id])
+  post   Post   @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
+}
+
+model Follow {
+  id          Int    @id @default(autoincrement())
+  followerId  String
+  followingId String
+  follower    User   @relation("follower", fields: [followerId], references: [id])
+  following   User   @relation("following", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  type       String
+  text       String
+  userId     String
+  fromUserId String
+  postId     Int?
+  read       Boolean  @default(false)
+  user       User     @relation("userNotifications", fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+model Hashtag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  posts Post[]
+}
