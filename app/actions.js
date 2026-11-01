@@ -156,3 +156,17 @@ export async function followUser(followingId) {
     }
     revalidatePath('/')
 }
+
+export async function deleteNotification(notificationId) {
+    const { auth } = await import('@/auth')
+    const session = await auth()
+    if (!session) return
+
+    await prisma.notification.delete({
+        where: {
+            id: Number(notificationId),
+            userId: session.user.id
+        }
+    })
+    revalidatePath('/')
+}

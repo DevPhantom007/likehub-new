@@ -1,7 +1,9 @@
 import { prisma } from '@/lib/prisma'
+import { auth } from '@/auth'
 import PostCard from '../PostCard'
 
 export default async function SearchPage({ searchParams }) {
+    const session = await auth()
     const params = await searchParams
     const q = params.q || ''
 
@@ -24,37 +26,37 @@ export default async function SearchPage({ searchParams }) {
     })
 
     return (
-        <div className="min-h-screen">
-            <header className="sticky top-0 z-20" style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #e5e7eb' }}>
-                <div className="max-w-[640px] mx-auto px-6 h-16 flex justify-between items-center">
-                    <a href="/" className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)' }}>
-                            <span style={{ color: '#fff', fontSize: '15px', fontWeight: '800' }}>L</span>
+        <div style={{ minHeight: '100vh' }}>
+            <header className="header">
+                <div className="header-inner">
+                    <a href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+                        <div className="logo-box">
+                            <span style={{ color: '#fff', fontSize: '13px', fontWeight: '800' }}>L</span>
                         </div>
-                        <span className="font-bold text-lg gradient-text">LikeHub</span>
+                        <span className="gradient-text" style={{ fontWeight: '700', fontSize: '15px' }}>LikeHub</span>
                     </a>
-                    <a href="/" className="btn-ghost">← Back</a>
+                    <a href="/" className="btn-ghost" style={{ textDecoration: 'none' }}>← Back</a>
                 </div>
             </header>
 
-            <main className="max-w-[640px] mx-auto px-6 py-10">
-                <div className="mb-8">
-                    <h1 className="text-2xl font-bold" style={{ color: '#1a1a1a', letterSpacing: '-0.02em' }}>
+            <main className="main-container">
+                <div style={{ marginBottom: '20px' }}>
+                    <h1 style={{ fontSize: '17px', fontWeight: '700', letterSpacing: '-0.01em' }}>
                         Search: "{q}"
                     </h1>
-                    <p className="text-sm mt-1" style={{ color: '#6b7280' }}>
+                    <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
                         {posts.length} results
                     </p>
                 </div>
 
-                <div className="space-y-5">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {posts.length === 0 && (
-                        <div className="card p-12 text-center">
-                            <p className="text-sm font-bold mb-1" style={{ color: '#1a1a1a' }}>Nothing found</p>
-                            <p className="text-sm" style={{ color: '#6b7280' }}>Try a different search term</p>
+                        <div className="card" style={{ padding: '40px 20px', textAlign: 'center' }}>
+                            <p style={{ fontSize: '14px', fontWeight: '600', color: '#1a1a1a' }}>Nothing found</p>
+                            <p style={{ fontSize: '12px', color: '#6b7280' }}>Try a different search term</p>
                         </div>
                     )}
-                    {posts.map(p => <PostCard key={p.id} post={p} />)}
+                    {posts.map(p => <PostCard key={p.id} post={p} currentUserId={session?.user?.id} />)}
                 </div>
             </main>
         </div>

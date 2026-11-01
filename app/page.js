@@ -2,6 +2,8 @@ import { auth } from '@/auth'
 import { register, login, logout, createPost } from './actions'
 import { prisma } from '@/lib/prisma'
 import PostCard from './PostCard'
+import Upload from './Upload'
+import NotificationBell from './NotificationBell'
 
 export default async function Home() {
     const session = await auth()
@@ -58,6 +60,12 @@ export default async function Home() {
         orderBy: { createdAt: 'desc' }
     })
 
+    const notifications = await prisma.notification.findMany({
+        where: { userId: session.user.id },
+        orderBy: { createdAt: 'desc' },
+        take: 20
+    })
+
     const userAvIdx = (session.user.name.charCodeAt(0) % 8) + 1
 
     return (
@@ -76,6 +84,7 @@ export default async function Home() {
                         <a href="/trending" className="btn-ghost" style={{ textDecoration: 'none' }}>Trending</a>
                         <a href="/saved" className="btn-ghost" style={{ textDecoration: 'none' }}>Saved</a>
                         <a href="/profile" className="btn-ghost" style={{ textDecoration: 'none' }}>Profile</a>
+                        <NotificationBell notifications={notifications} />
                         <form action={logout}>
                             <button className="btn-ghost">Sign out</button>
                         </form>
@@ -85,7 +94,7 @@ export default async function Home() {
 
             {/* Main */}
             <main className="main-container">
-                {/* Search Input - ՆՈՐԸ */}
+                {/* Search Input */}
                 <form action="/search" style={{ marginBottom: '20px' }}>
                     <div style={{ position: 'relative' }}>
                         <input
@@ -127,10 +136,12 @@ export default async function Home() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <input name="title" placeholder="Title" style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', fontWeight: '600', fontSize: '14px' }} required />
                         <textarea name="content" placeholder="Share your idea..." style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', resize: 'none', fontFamily: 'inherit' }} rows={2} required />
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                            <input name="image" placeholder="Image URL" style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', fontSize: '13px' }} />
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <Upload />
                             <input name="tags" placeholder="Tags: design, idea" style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', fontSize: '13px' }} />
                         </div>
+
                         <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '2px' }}>
                             <button type="submit" className="btn-primary">Publish</button>
                         </div>
@@ -145,7 +156,7 @@ export default async function Home() {
                             <p style={{ fontSize: '12px', color: '#6b7280' }}>Be the first to share</p>
                         </div>
                     )}
-                    {posts.map(p => <PostCard key={p.id} post={p} />)}
+                    {posts.map(p => <PostCard key={p.id} post={p} currentUserId={session.user.id} />)}
                 </div>
             </main>
         </div>

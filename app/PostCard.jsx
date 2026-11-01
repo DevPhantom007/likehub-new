@@ -3,7 +3,7 @@ import { toggleLike, toggleSave, addComment } from './actions'
 import FollowButton from './FollowButton'
 import { useState } from 'react'
 
-export default function PostCard({ post }) {
+export default function PostCard({ post, currentUserId }) {
     const [liked, setLiked] = useState(false)
     const [likeCount, setLikeCount] = useState(post.likes?.length || 0)
     const [saved, setSaved] = useState(false)
@@ -33,13 +33,17 @@ export default function PostCard({ post }) {
                         {initials}
                     </div>
                     <div>
-                        <p style={{ fontSize: '13px', fontWeight: '700', lineHeight: '1.2' }}>{post.author.name}</p>
+                        <a href={`/profile/${post.author.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <p style={{ fontSize: '13px', fontWeight: '700', lineHeight: '1.2' }}>{post.author.name}</p>
+                        </a>
                         <p style={{ fontSize: '11px', color: '#9ca3af', marginTop: '1px' }}>
                             {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                         </p>
                     </div>
                 </div>
-                <FollowButton targetUserId={post.author.id} isFollowing={false} />
+                {post.author.id !== currentUserId && (
+                    <FollowButton targetUserId={post.author.id} isFollowing={false} />
+                )}
             </div>
 
             {/* Content */}
